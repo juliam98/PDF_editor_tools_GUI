@@ -1,11 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
+from tkinter.ttk import *
 from tkinter import font as tkfont
 from PIL import ImageTk,Image 
 from tkinter import filedialog
 from tkmacosx import Button
 import os
+from PyPDF2 import PdfReader, PdfWriter
 
 # code based on:
 # https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter/7557028#7557028
@@ -17,10 +19,14 @@ class General_setup(tk.Tk):
 
         # configure the root window
         self.title('PDF tools')
-        self.geometry('550x500')
-        self.title_font = tkfont.Font(family='Arial', size=25)
-        self.text_font = tkfont.Font(family='Arial', size=18)
-        self.bg_colour = '#BCB4F6'
+        self.geometry('600x600')
+        self.minsize(600, 600)
+        self.defaultFont = tkfont.nametofont("TkDefaultFont")
+        self.defaultFont.config(family='Arial', size=16)
+        style = ttk.Style()
+        # style.configure('TButton', font=('Arial', 14, 'bold', 'underline'), foreground = 'red')
+        
+        self.bg_colour = '#6DAEDB'
         self.red = '#F6B6CF'
 
         # the container is where we'll stack a bunch of frames
@@ -44,17 +50,14 @@ class General_setup(tk.Tk):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
-
-            # put all of the pages in the same location;
-            # the one on the top of the stacking order
-            # will be the one that is visible.
             frame.grid(row=0, column=0, sticky="nsew")
-            frame.config(bg=self.bg_colour, highlightbackground=self.bg_colour)
-        
+            frame.tk_setPalette(self.bg_colour)
+            frame.config(bg=self.bg_colour)
+    
         # Menu definition
         menubar = tk.Menu(self, bg='#b6d7a8')
         self.config(menu=menubar)
-        menu_pdf_tools = tk.Menu(menubar, tearoff=False, bg='#b6d7a8', activebackground='#93c47d', type='normal')
+        menu_pdf_tools = tk.Menu(menubar, tearoff=False, type='normal')
         
         # add menu items to the File menu
         menu_pdf_tools.add_command(label='Rotate page', command=lambda: self.show_frame("Rotate_PDF"))
@@ -85,10 +88,10 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is the start page", background='#BCB4F6')
-        label.pack(side="top", fill="x", pady=10)
+        label = tk.Label(self, text="This is the start page")
+        label.place(relx=.5, rely=.045, anchor='center')
 
-        button1 = Button(self, text="Go to \'Rotate page\'",
+        button1 = Button(self, text="Go to \'Rotate page\'", padx=20,
                             command=lambda: controller.show_frame("Rotate_PDF"), borderless=True)
         button2 = Button(self, text="Go to \'Merge PDF files\'", overrelief='sunken',
                             command=lambda: controller.show_frame("Merge_PDF"), borderless=True)
@@ -101,77 +104,122 @@ class Rotate_PDF(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is the page for rotating page(s) in your PDF files", background='#BCB4F6')
-        label.place(relx=.5, rely=.05, anchor='center')
 
-        file_select_label = Label(self, text="Select file:", padx=20, background='#BCB4F6')
+        # Window title
+        label = tk.Label(self, text="Rotate individual pages in a PDF file", font=('Arial', 20))
+        label.place(relx=.5, rely=.045, anchor='center')
+
+        # Select files: Label
+        file_select_label = tk.Label(self, text="Select file:", padx=20)
         file_select_label.place(relx=.5, rely=.15, anchor='e')
 
-        file_select_button = Button(self, text="Browse files", command=lambda: self.select_files(self.text_entry), padx=20, justify='right', borderless=True)
+        # Select files: Filebrowser button
+        file_select_button = Button(self, text="Browse files", command=lambda: self.select_files(self.path_entry), padx=20, justify='right', borderless=True)
         file_select_button.place(relx=.5, rely=.15, anchor='w')
 
-        # Display the selected file
-        list_files_label = Label(self, text="Your file:", padx=20, background='#BCB4F6')
-        list_files_label.place(relx=.5, rely=.25,anchor='e')
+        # Select files: "Your file:" label 
+        list_files_label = tk.Label(self, text="Your file:", padx=20)
+        list_files_label.place(relx=.5, rely=.2,anchor='e')
 
-        self.text_entry = StringVar(self, "nothng selected yet") # Empty string variablet which will be updated with user's entry 
-        selected_file = Label(self, textvariable=self.text_entry, padx=0, wraplength=250, background='#BCB4F6')
-        selected_file.place(relx=.5, rely=.25, anchor='w')
+        self.path_entry = StringVar(self, "nothng selected yet") # Placeholder value to which selected path will be assigned
 
-        # Choose angle of rotation
-        rotate_by_label = Label(self, text="Rotate by:", background='#BCB4F6', padx=20)
-        rotate_by_label.place(relx=0.5, rely=0.35, anchor='e')
+        # Select files: Display the selected file
+        selected_file = tk.Label(self, textvariable=self.path_entry, padx=0, wraplength=300) # selected file will replace this label text
+        selected_file.place(relx=.5, rely=.2, anchor='w')
 
-        self.angle_var = tk.IntVar(None, value=90)
-        R_90 = Radiobutton(self, text="90\N{DEGREE SIGN}", variable=self.angle_var, value=90, background='#BCB4F6', command=self.printResults)
-        R_90.place(relx=.55, rely=.35, anchor='center')
-        R_180 = Radiobutton(self, text="180\N{DEGREE SIGN}", variable=self.angle_var, value=180, background='#BCB4F6', command=self.printResults)
-        R_180.place(relx=.65, rely=.35, anchor='center')
-        R_270 = Radiobutton(self, text="270\N{DEGREE SIGN}", variable=self.angle_var, value=270, background='#BCB4F6', command=self.printResults)
-        R_270.place(relx=.75, rely=.35, anchor='center')
+        # Rotation angle: Label
+        rotate_by_label = tk.Label(self, text="Rotate by:", padx=20)
+        rotate_by_label.place(relx=0.5, rely=0.25, anchor='e')
+
+        self.angle_var = tk.IntVar(None, value=90) # Placeholder value to which angle of rotation will be assigned
+
+        # Rotation angle: Choose angle of rotation
+        R_90 = tk.Radiobutton(self, text="90\N{DEGREE SIGN}", variable=self.angle_var, value=90)
+        R_90.place(relx=.55, rely=.25, anchor='center')
+        R_180 = tk.Radiobutton(self, text="180\N{DEGREE SIGN}", variable=self.angle_var, value=180)
+        R_180.place(relx=.65, rely=.25, anchor='center')
+        R_270 = tk.Radiobutton(self, text="270\N{DEGREE SIGN}", variable=self.angle_var, value=270)
+        R_270.place(relx=.75, rely=.25, anchor='center')
 
         # Name of the new file
-        new_filename = StringVar(None, "rotated_PDF")
-        new_filename_label = Label(self, text='Name of the new file:', padx=20, background='#BCB4F6')
-        new_filename_label.place(relx=0.5, rely=0.45, anchor='e')
+        self.new_filename = tk.StringVar(None, "rotated_PDF") # Placeholder value to which angle of rotation will be assigned, default value is "rotated_PDF"
+        # Name of the new file: Label
+        new_filename_label = tk.Label(self, text='Name of the new file:', padx=20)
+        new_filename_label.place(relx=0.5, rely=0.3, anchor='e')
 
-        new_filename_entry = Entry(self, textvariable=new_filename, justify='right', background='#ddd9fc', highlightbackground='#BCB4F6')
-        new_filename_entry.place(relx=0.5, rely=0.45, anchor='w', relwidth=.2)
-        ext_label = Label(self, text='.pdf', padx=0, background='#BCB4F6')
-        ext_label.place(relx=0.7, rely=0.45, anchor='w')
+        # Name of the new file: Entry box
+        new_filename_entry = tk.Entry(self, textvariable=self.new_filename, justify='right', background='#ffffff')
+        new_filename_entry.place(relx=0.5, rely=0.3, anchor='w', relwidth=.2)
+        # Name of the new file: label with ".pdf" extension to let the user know that filename should be typed without the extensions
+        ext_label = tk.Label(self, text='.pdf', padx=0)
+        ext_label.place(relx=0.7, rely=0.3, anchor='w')
 
-        file_select_button = Button(self, text="Return to main page", command=lambda: controller.show_frame("StartPage"), padx=0, justify='right', borderless=True, bg='#F6B6CF', overrelief='groove')
-        file_select_button.place(relx=.5, rely=.55, anchor='e')
+        # Pages to rotate
+        self.pages_to_rotate = StringVar(self, "1") # Placeholder value which angle of rotation will be assigned
+        # Pages to rotate: Label
+        pages_to_rotate_label = tk.Label(self, text='Pages to rotate', padx=20)
+        pages_to_rotate_label.place(relx=0.5, rely=0.35, anchor='e')
+        # Pages to rotate: Entry
+        self.pages_to_rotate_entry = tk.Entry(self, justify='left', background='#ffffff', textvariable=self.pages_to_rotate)
+        self.pages_to_rotate_entry.place(relx=0.5, rely=0.35, anchor='w', relwidth=.2)
 
-        file_select_button = Button(self, text="OK", command=None, padx=20, justify='right', borderless=True)
-        file_select_button.place(relx=.5, rely=.55, anchor='w')
+        # General page buttons: Return to main page
+        file_select_button = Button(self, text="Return to main page", command=lambda: controller.show_frame("StartPage"), padx=0, justify='right', borderless=True, overrelief='groove')
+        file_select_button.place(relx=.5, rely=.45, anchor='e')
+        # General page buttons: OK (submits the entry)
+        file_select_button = Button(self, text="OK", command=self.rotate_pdf_pages, padx=20, justify='right', borderless=True)
+        file_select_button.place(relx=.5, rely=.45, anchor='w')
+
+        self.output_text = StringVar(self, "") # Placeholder value to which new filename and path where file was saved will be assigned when "OK" button is clicked
+        # Message (from output_text variable) that is displayed after "OK" is clicked to inform the user that their PDF was saved
+        output_text_label = tk.Label(self, textvariable=self.output_text, wraplength=500, fg='#ffffff')
+        output_text_label.place(relx=.5, rely=.55, anchor="center")
 
     def select_files(self, var):
         """
         This function definies filebrowser dialog assigned to a button widget.
-
-        In the "main_window" the listbox widget "list_files_output" is updated to show the "file_path" variable(s) (i.e. path to the file(s))
         """
         filetypes = (
-            ('excel', '*.xlsx'),
-            ('photo', '*.png'),
+            ('PDFs', '*.pdf'),
             ('text files', '*.txt'))
 
         file_path = filedialog.askopenfilename(
             title='Open files',
-            initialdir='/Users/juliamarcinkowska/Desktop/',
+            initialdir='',
             filetypes=filetypes)
         
         filename = os.path.basename(file_path)
 
-        var.set(filename)
+        var.set(file_path)
         self.focus()
-        return filename
-    
-    def printResults(self):
-        print(self.angle_var.get())
 
+        return file_path
 
+    def rotate_pdf_pages(self):
+        # create output path (same directory as original file + filename)
+        out_path = os.path.dirname(self.path_entry.get()) + "/" + self.new_filename.get() + ".pdf"
+
+        # get page numbers to rotate
+        self.pages_no = [int(num) for num in (self.pages_to_rotate_entry.get()).split(",")]
+        
+        with open(self.path_entry.get(), 'rb') as file:
+            reader = PdfReader(file)
+            writer = PdfWriter()
+
+            for page_num in range(len(reader.pages)):
+                page = reader.pages[page_num] # all pages in the selected pdf is assigned to the variable "page"
+
+                if page_num + 1 in self.pages_no: # since python indexes from 0
+                    page.rotate(self.angle_var.get()) 
+            
+                writer.add_page(page)
+
+            with open(out_path, "wb") as out_path:
+                writer.write(out_path)
+        
+        self.output_text.set("\"" + self.new_filename.get() + ".pdf" + "\"" + " was saved in " + os.path.dirname(self.path_entry.get()) + "/")
+
+        
 class Merge_PDF(tk.Frame):
 
     def __init__(self, parent, controller):
