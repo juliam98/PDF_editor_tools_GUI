@@ -24,7 +24,6 @@ class General_setup(tk.Tk):
         self.defaultFont = tkfont.nametofont("TkDefaultFont")
         self.defaultFont.config(family='Arial', size=16)
         style = ttk.Style()
-        # style.configure('TButton', font=('Arial', 14, 'bold', 'underline'), foreground = 'red')
         
         self.bg_colour = '#6DAEDB'
         self.red = '#F6B6CF'
@@ -121,11 +120,11 @@ class Rotate_PDF(tk.Frame):
         list_files_label = tk.Label(self, text="Your file:", padx=20)
         list_files_label.place(relx=.5, rely=.2,anchor='e')
 
-        self.path_entry = StringVar(self, "nothng selected yet") # Placeholder value to which selected path will be assigned
+        self.path_entry = StringVar(self, "no file selected yet") # Placeholder value to which selected path will be assigned
 
         # Select files: Display the selected file
-        selected_file = tk.Label(self, textvariable=self.path_entry, padx=0, wraplength=300) # selected file will replace this label text
-        selected_file.place(relx=.5, rely=.2, anchor='w')
+        self.selected_file = tk.Label(self, textvariable=self.path_entry, padx=20) # selected file will replace this label text
+        self.selected_file.place(relx=.5, rely=.2, anchor='w')
 
         # Rotation angle: Label
         rotate_by_label = tk.Label(self, text="Rotate by:", padx=20)
@@ -148,7 +147,7 @@ class Rotate_PDF(tk.Frame):
         new_filename_label.place(relx=0.5, rely=0.3, anchor='e')
 
         # Name of the new file: Entry box
-        new_filename_entry = tk.Entry(self, textvariable=self.new_filename, justify='right', background='#ffffff')
+        new_filename_entry = tk.Entry(self, justify='right', background='#ffffff', textvariable=self.new_filename)
         new_filename_entry.place(relx=0.5, rely=0.3, anchor='w', relwidth=.2)
         # Name of the new file: label with ".pdf" extension to let the user know that filename should be typed without the extensions
         ext_label = tk.Label(self, text='.pdf', padx=0)
@@ -188,8 +187,6 @@ class Rotate_PDF(tk.Frame):
             initialdir='',
             filetypes=filetypes)
         
-        filename = os.path.basename(file_path)
-
         var.set(file_path)
         self.focus()
 
@@ -201,23 +198,28 @@ class Rotate_PDF(tk.Frame):
 
         # get page numbers to rotate
         self.pages_no = [int(num) for num in (self.pages_to_rotate_entry.get()).split(",")]
+
+        try:
+            with open(self.path_entry.get(), 'rb') as file:
+                reader = PdfReader(file)
+                writer = PdfWriter()
+
+                for page_num in range(len(reader.pages)):
+                    page = reader.pages[page_num] # all pages in the selected pdf is assigned to the variable "page"
+
+                    if page_num + 1 in self.pages_no: # since python indexes from 0
+                        page.rotate(self.angle_var.get()) 
+                
+                    writer.add_page(page)
+
+                with open(out_path, "wb") as out_path:
+                    writer.write(out_path)
         
-        with open(self.path_entry.get(), 'rb') as file:
-            reader = PdfReader(file)
-            writer = PdfWriter()
-
-            for page_num in range(len(reader.pages)):
-                page = reader.pages[page_num] # all pages in the selected pdf is assigned to the variable "page"
-
-                if page_num + 1 in self.pages_no: # since python indexes from 0
-                    page.rotate(self.angle_var.get()) 
-            
-                writer.add_page(page)
-
-            with open(out_path, "wb") as out_path:
-                writer.write(out_path)
+            self.output_text.set("\"" + self.new_filename.get() + ".pdf" + "\"" + " was saved in " + os.path.dirname(self.path_entry.get()) + "/")
         
-        self.output_text.set("\"" + self.new_filename.get() + ".pdf" + "\"" + " was saved in " + os.path.dirname(self.path_entry.get()) + "/")
+        except FileNotFoundError:
+            self.selected_file.configure(background='#EE9D9D')
+            self.selected_file.after(750, lambda: self.selected_file.configure(background='#6DAEDB'))
 
         
 class Merge_PDF(tk.Frame):

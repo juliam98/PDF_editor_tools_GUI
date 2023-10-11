@@ -2,9 +2,9 @@
 
 A simple GUI for editing PDF files. 
 
-It is currently being developed for rotating individual pages in PDF files, and for merging two documents. 
+It is currently being developed for rotating selected pages in PDF files, and for merging two documents. 
 
-The current version was uploaded as a representation of the visual aspect of the GUI, but tit is not yet functional. The code was written on a mac, so future versions will be adjusted for any potential issues for Windows users. 
+Currently rotating is working; while the merging option will be added in the near future.
 
 Stay tuned for updates. 
 
