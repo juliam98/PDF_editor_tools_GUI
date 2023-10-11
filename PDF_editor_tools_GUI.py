@@ -227,7 +227,7 @@ class Merge_PDF(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is page for merging two PDF files. Under construction", background='#BCB4F6', wraplength=300)
+        label = tk.Label(self, text="This is page for merging two PDF files. Under construction", background='#6DAEDB', wraplength=300)
         label.place(relx=0.5, rely=0.1, anchor='center')
 
         button = Button(self, text="Go to the start page",
