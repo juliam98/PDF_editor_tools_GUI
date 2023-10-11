@@ -47,7 +47,7 @@ class General_setup(tk.Tk):
         self.frames = {}
         for F in (StartPage, Rotate_PDF, Merge_PDF):
             page_name = F.__name__
-            frame = F(parent=container, controller=self)
+            frame = F(parent=container, controller=self, bg_colour=self.bg_colour)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
             frame.tk_setPalette(self.bg_colour)
@@ -84,10 +84,12 @@ class General_setup(tk.Tk):
 
 class StartPage(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, bg_colour):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is the start page")
+        self.bg_colour = bg_colour
+
+        label = tk.Label(self, text="This is the start page", font=('Arial', 20))
         label.place(relx=.5, rely=.045, anchor='center')
 
         button1 = Button(self, text="Go to \'Rotate page\'", padx=20,
@@ -100,9 +102,10 @@ class StartPage(tk.Frame):
 
 class Rotate_PDF(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, bg_colour):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.bg_colour = bg_colour
 
         # Window title
         label = tk.Label(self, text="Rotate individual pages in a PDF file", font=('Arial', 20))
@@ -219,18 +222,19 @@ class Rotate_PDF(tk.Frame):
         
         except FileNotFoundError:
             self.selected_file.configure(background='#EE9D9D')
-            self.selected_file.after(750, lambda: self.selected_file.configure(background='#6DAEDB'))
+            self.selected_file.after(750, lambda: self.selected_file.configure(background=self.bg_colour))
 
         
 class Merge_PDF(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, bg_colour):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is page for merging two PDF files. Under construction", background='#6DAEDB', wraplength=300)
+        self.bg_colour = bg_colour
+        label = tk.Label(self, text="This is page for merging two PDF files. Under construction", background=bg_colour, wraplength=300)
         label.place(relx=0.5, rely=0.1, anchor='center')
 
-        button = Button(self, text="Go to the start page",
+        button = Button(self, text="Return to main page",
                            command=lambda: controller.show_frame("StartPage"), borderless=True)
         button.place(relx=0.5, rely=0.2, anchor='center')
 
