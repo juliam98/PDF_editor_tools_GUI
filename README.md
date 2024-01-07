@@ -6,7 +6,7 @@ It is currently being developed for rotating selected pages in PDF files, and fo
 
 Currently rotating is working; while the merging option will be added in the near future.
 
-Stay tuned for updates. 
+Stay tuned for updates.
 
 <img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/b20f2aae-a91c-4192-9d5c-2c9230d6ac23"  width="400" height="400">
 <br>
