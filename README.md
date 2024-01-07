@@ -2,7 +2,7 @@
 
 A simple GUI for editing PDF files. 
 
-It is currently being developed for rotating selected pages in PDF files, and for merging two documents. 
+It currently works for rotating selected pages in PDF files, and for merging two documents. 
 
 Future versions might include more functions and improvements in look or function. 
 
