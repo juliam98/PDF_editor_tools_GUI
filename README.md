@@ -4,12 +4,12 @@ A simple GUI for editing PDF files.
 
 It is currently being developed for rotating selected pages in PDF files, and for merging two documents. 
 
-Currently rotating is working; while the merging option will be added in the near future.
+Future versions might include more functions and improvements in look or function. 
 
-Stay tuned for updates.
+Stay tuned for updates!
 
-<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/b20f2aae-a91c-4192-9d5c-2c9230d6ac23"  width="400" height="400">
+<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/26f6062e-84fc-4683-a3ff-83337bbe4997"  width="400" height="400">
 <br>
-<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/35bd3bef-d751-4216-94e9-647e855b369b"  width="400" height="400">
+<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/4d71f0a7-e1f6-4556-b248-fafe9196ea4d"  width="400" height="400">
 <br>
-<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/7af32668-69d5-4228-b5e7-e5886f98d645"  width="400" height="400">
+<img src="https://github.com/juliam98/PDF_editor_tools_GUI/assets/93785710/8880e625-c7ec-44dc-baca-42f15200acea"  width="400" height="400">
