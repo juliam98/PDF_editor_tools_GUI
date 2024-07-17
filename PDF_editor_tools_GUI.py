@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import Tk
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import font as tkfont
@@ -94,12 +95,12 @@ class StartPage(tk.Frame):
         self.controller = controller
         self.bg_colour = bg_colour
 
-        label = tk.Label(self, text="This is the start page", font=('Arial', 20))
+        label = tk.Label(self, text="PDF editing tools", font=('Arial', 24))
         label.place(relx=.5, rely=.045, anchor='center')
 
-        button1 = Button(self, text="Go to \'Rotate page\'", padx=20,
+        button1 = Button(self, text="Rotate page", padx=20,
                             command=lambda: controller.show_frame("Rotate_PDF"), borderless=True)
-        button2 = Button(self, text="Go to \'Merge PDF files\'", overrelief='sunken',
+        button2 = Button(self, text="Merge PDF files", overrelief='sunken',
                             command=lambda: controller.show_frame("Merge_PDF"), borderless=True)
         button1.place(relx=0.5, rely=.15, anchor='center')
         button2.place(relx=0.5, rely=.25, anchor='center')
@@ -273,7 +274,7 @@ class Merge_PDF(tk.Frame):
         self.x_scroll_files = tk.Scrollbar(self, orient='horizontal', background=bg_colour[1])
         self.x_scroll_files.place(relx=.5, rely=.32, anchor='w', relwidth=0.4)
         # Scrollbar for the listbox: VERTICAL
-        self.y_scroll_files = tk.Scrollbar(self, orient='vertical', background=bg_colour[1])
+        self.y_scroll_files = tk.Scrollbar(self, orient='vertical', background=bg_colour[0], border=0)
         self.y_scroll_files.place(relx=.91, rely=.25, anchor='w', relheight=0.1)
 
         # Selected files: Output in a listbox
@@ -283,8 +284,9 @@ class Merge_PDF(tk.Frame):
         self.x_scroll_files.config(command=self.list_files_output.xview) 
         self.y_scroll_files.config(command=self.list_files_output.yview) 
 
-        self.list_menu = Menu(self.list_files_output, tearoff = 0) 
-        self.list_menu.add_command(label ="Remove", command=self.delete_selected) 
+        # right click on file to remove it
+        self.list_menu = Menu(self.list_files_output, tearoff=0)
+        self.list_menu.add_command(label="Remove", command=self.delete_selected)
         self.list_files_output.bind("<Button-2>", self.disp_listbox_menu)
 
         # Name of the new file
@@ -329,7 +331,8 @@ class Merge_PDF(tk.Frame):
             filetypes=filetypes)
 
         for index in range(len(filenames)):
-            self.list_files_output.insert(index, filenames[index])
+            just_name_of_file = filenames[index].split("/")[-1]
+            self.list_files_output.insert(index, just_name_of_file)
 
         self.focus()
     
